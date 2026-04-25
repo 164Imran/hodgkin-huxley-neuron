@@ -1,74 +1,30 @@
-# Hodgkin-Huxley Neuron Model Simulator
+# Hodgkin-Huxley Neuron Simulation
 
-A Python implementation of the **Hodgkin-Huxley model** — the seminal biophysical model of action potential generation in neurons, awarded the Nobel Prize in Physiology or Medicine (1963).
+Before building a neural network, I wanted to understand what a neuron actually *is* — not as an abstraction, but as a physical object: ion channels opening and closing, a membrane charging and discharging, a spike that either fires or doesn't.
 
-## Overview
+The Hodgkin-Huxley model is the closest thing we have to a ground truth for that. Four coupled differential equations, integrated here with RK4, that reproduce the exact shape of an action potential.
 
-This simulation models the electrical activity of a neuron membrane by numerically integrating four coupled differential equations that describe:
+---
 
-- **V** — membrane potential (mV)
-- **n** — K⁺ channel activation gate
-- **m** — Na⁺ channel activation gate
-- **h** — Na⁺ channel inactivation gate
+## The bigger picture
 
-The numerical integration uses a **4th-order Runge-Kutta (RK4)** method for accuracy and stability.
+This is the first step toward something larger: a **network of Hodgkin-Huxley neurons**.
 
-## Physics of the Model
+To get there, the next problems to solve are:
 
-The membrane potential evolves according to:
+- **Synaptic connections** — modelling how one neuron's spike triggers a current in the next (excitatory / inhibitory synapses, transmission delay)
+- **Plasticity** — making the connection weights adapt over time, not just simulate fixed anatomy
 
-```
-Cm · dV/dt = I_ext - g_Na·m³·h·(V - E_Na) - g_K·n⁴·(V - E_K) - g_L·(V - E_L)
-```
+On plasticity specifically, I'm curious about whether **ant colony optimization** could be relevant here. ACO is a collective memory mechanism: pheromone trails reinforce frequently-used paths and fade otherwise — which structurally mirrors Hebbian learning (*neurons that fire together, wire together*). Whether it maps cleanly onto spike-timing dynamics is an open question, but worth exploring.
 
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| `Cm` | 1.0 µF/cm² | Membrane capacitance |
-| `g_Na` | 120.0 mS/cm² | Max Na⁺ conductance |
-| `g_K` | 36.0 mS/cm² | Max K⁺ conductance |
-| `g_L` | 0.3 mS/cm² | Leak conductance |
-| `E_Na` | +50 mV | Na⁺ reversal potential |
-| `E_K` | −77 mV | K⁺ reversal potential |
-| `E_L` | −54.387 mV | Leak reversal potential |
+---
 
-## Features
-
-- Full RK4 numerical integration of the HH equations
-- Live animated plot showing membrane potential and gating variables
-- Sweep of external current `I_ext` from 0 to 50 µA/cm² to visualize the **firing threshold**
-
-## Requirements
+## Stack
 
 ```
-numpy
-matplotlib
+numpy · matplotlib
 ```
-
-Install with:
-
-```bash
-pip install numpy matplotlib
-```
-
-## Usage
 
 ```bash
 python NN/hodgkin_huxley_neuro.py
 ```
-
-The simulation will open an animated window sweeping through 100 values of external current. You will observe:
-- **Sub-threshold** regime: membrane potential returns to rest
-- **Action potential** generation: stereotypical spike when `I_ext` crosses the threshold (~6.3 µA/cm²)
-- **Repetitive firing** at higher stimulation intensities
-
-## Output
-
-The live plot displays:
-- `V × 0.05` (purple) — scaled membrane potential
-- `n` (green) — K⁺ activation
-- `m` (red) — Na⁺ activation
-- `h` (blue) — Na⁺ inactivation
-
-## References
-
-- Hodgkin, A.L. & Huxley, A.F. (1952). *A quantitative description of membrane current and its application to conduction and excitation in nerve.* Journal of Physiology, 117(4), 500–544.
